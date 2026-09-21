@@ -1,36 +1,33 @@
 package ru.mipt.bit.platformer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public final class GameField {
     private final int width;
     private final int height;
-    private final CellOccupant[][] occupants;
+    private final List<CellOccupant> occupants = new ArrayList<>();
 
     public GameField(int width, int height) {
         this.width = width;
         this.height = height;
-        occupants = new CellOccupant[height][width];
     }
 
-    /** Places objects during setup; the initial configuration is assumed valid. */
-    public void place(CellOccupant occupant, int x, int y) {
-        occupants[y][x] = occupant;
+    public void addOccupant(CellOccupant occupant) {
+        occupants.add(Objects.requireNonNull(occupant));
     }
 
-    /** Returns true only after transferring occupancy to the destination cell. */
-    public boolean tryRelocate(CellOccupant occupant, int fromX, int fromY,
-                               int toX, int toY) {
-        if (occupant == null || !isInside(fromX, fromY) || !isInside(toX, toY)) {
-            return false;
+    public boolean tileOccupied(int x, int y) {
+        for (CellOccupant occupant : occupants) {
+            if (occupant.tileOccupied(x, y)) {
+                return true;
+            }
         }
-        if (occupants[fromY][fromX] != occupant || occupants[toY][toX] != null) {
-            return false;
-        }
-        occupants[fromY][fromX] = null;
-        occupants[toY][toX] = occupant;
-        return true;
+        return false;
     }
 
-    private boolean isInside(int x, int y) {
+    public boolean isInside(int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 }

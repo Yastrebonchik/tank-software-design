@@ -9,6 +9,11 @@ public final class Tree implements CellOccupant {
         this.y = y;
     }
 
+    @Override
+    public boolean tileOccupied(int x, int y) {
+        return this.x == x && this.y == y;
+    }
+
     public int getX() {
         return x;
     }

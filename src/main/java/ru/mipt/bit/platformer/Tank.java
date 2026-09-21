@@ -46,7 +46,7 @@ public final class Tank implements CellOccupant {
                 break;
         }
 
-        if (!field.tryRelocate(this, x, y, targetX, targetY)) {
+        if (!field.isInside(targetX, targetY) || field.tileOccupied(targetX, targetY)) {
             return false;
         }
         movementStartX = x;
@@ -58,6 +58,9 @@ public final class Tank implements CellOccupant {
     }
 
     public void update(float deltaTime) {
+        if (!Float.isFinite(deltaTime) || deltaTime < 0f) {
+            throw new IllegalArgumentException("deltaTime must be finite and non-negative");
+        }
         movementProgress = Math.max(0f, Math.min(1f,
                 movementProgress + deltaTime / MOVE_DURATION_SECONDS));
         if (Math.abs(1f - movementProgress) <= PROGRESS_TOLERANCE) {
@@ -69,6 +72,11 @@ public final class Tank implements CellOccupant {
 
     public boolean isMoving() {
         return movementProgress < 1f;
+    }
+
+    @Override
+    public boolean tileOccupied(int x, int y) {
+        return this.x == x && this.y == y;
     }
 
     public int getX() {
