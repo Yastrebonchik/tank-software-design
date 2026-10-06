@@ -1,32 +1,37 @@
 package ru.mipt.bit.platformer;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
+import java.util.Objects;
 
-public class GameCycle extends ApplicationAdapter {
-    private GameWorld world;
-    private KeyboardController controller;
-    private GameRenderer renderer;
+/** Coordinates a frame without depending on a window or a graphics library. */
+public final class GameCycle {
+    private final InputHandler input;
+    private final Updatable world;
+    private final FrameRenderer renderer;
+    private boolean disposed;
 
-    @Override
-    public void create() {
-        renderer = new GameRenderer();
-        world = GameWorld.createDefault(renderer.getFieldWidth(), renderer.getFieldHeight());
-        controller = KeyboardController.forPlayer(key -> Gdx.input.isKeyPressed(key),
-                world.getPlayer(), world.getField());
+    public GameCycle(InputHandler input, Updatable world, FrameRenderer renderer) {
+        this.input = Objects.requireNonNull(input);
+        this.world = Objects.requireNonNull(world);
+        this.renderer = Objects.requireNonNull(renderer);
     }
 
-    @Override
-    public void render() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
-        controller.processInput();
-        renderer.prepareFrame(world);
+    public void tick(float deltaTime) {
+        if (disposed) {
+            throw new IllegalStateException("Game cycle has been disposed");
+        }
+        if (!Float.isFinite(deltaTime) || deltaTime < 0f) {
+            throw new IllegalArgumentException("deltaTime must be finite and non-negative");
+        }
+        input.processInput();
+        renderer.prepareFrame();
         world.update(deltaTime);
-        renderer.render(world);
+        renderer.render();
     }
 
-    @Override
     public void dispose() {
-        renderer.dispose();
+        if (!disposed) {
+            disposed = true;
+            renderer.dispose();
+        }
     }
 }

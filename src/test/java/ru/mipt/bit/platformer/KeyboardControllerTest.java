@@ -12,9 +12,16 @@ import static com.badlogic.gdx.Input.Keys.*;
 
 class KeyboardControllerTest {
     private final Set<Integer> pressed = new HashSet<>();
-    private final GameWorld world = GameWorld.createDefault(10, 8);
-    private final Tank tank = world.getPlayer();
-    private final KeyboardController controller = KeyboardController.forPlayer(pressed::contains, tank, world.getField());
+    private final GameWorld world = new GameWorld(new GameField(10, 8));
+    private final Tank tank = new Tank(1, 1, 0.4f);
+    private final KeyboardController controller = new KeyboardController(pressed::contains);
+
+    KeyboardControllerTest() {
+        world.addOccupant(tank);
+        world.addUpdatable(tank);
+        world.addOccupant(new Tree(1, 3));
+        PlayerKeyBindings.install(controller, tank, world.getField());
+    }
 
     @ParameterizedTest @CsvSource({"UP,1,2", "W,1,2", "LEFT,0,1", "A,0,1", "DOWN,1,0", "S,1,0", "RIGHT,2,1", "D,2,1"})
     void eachMovementKey(String key, int x, int y) throws Exception {
@@ -42,7 +49,7 @@ class KeyboardControllerTest {
     }
 
     @Test void blockedEarlierDirectionAllowsNextDirection() {
-        world.addTree(new Tree(1, 2));
+        world.addOccupant(new Tree(1, 2));
         pressed.add(UP); pressed.add(LEFT);
         controller.processInput(); assertTrue(tank.tileOccupied(0, 1));
         assertEquals(Tank.MoveDirection.LEFT, tank.getDirection());

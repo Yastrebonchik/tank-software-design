@@ -2,12 +2,12 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
-public final class Tank implements CellOccupant {
+public final class Tank implements CellOccupant, Updatable {
     public enum MoveDirection {
         UP, DOWN, LEFT, RIGHT
     }
 
-    private static final float MOVE_DURATION_SECONDS = 0.4f;
+    private final float moveDurationSeconds;
     private static final float PROGRESS_TOLERANCE = 0.000001f;
 
     private int x;
@@ -17,7 +17,11 @@ public final class Tank implements CellOccupant {
     private MoveDirection direction = MoveDirection.RIGHT;
     private float movementProgress = 1f;
 
-    public Tank(int x, int y) {
+    public Tank(int x, int y, float moveDurationSeconds) {
+        if (!Float.isFinite(moveDurationSeconds) || moveDurationSeconds <= 0f) {
+            throw new IllegalArgumentException("Move duration must be finite and positive");
+        }
+        this.moveDurationSeconds = moveDurationSeconds;
         this.x = x;
         this.y = y;
         movementStartX = x;
@@ -57,12 +61,13 @@ public final class Tank implements CellOccupant {
         return true;
     }
 
+    @Override
     public void update(float deltaTime) {
         if (!Float.isFinite(deltaTime) || deltaTime < 0f) {
             throw new IllegalArgumentException("deltaTime must be finite and non-negative");
         }
         movementProgress = Math.max(0f, Math.min(1f,
-                movementProgress + deltaTime / MOVE_DURATION_SECONDS));
+                movementProgress + deltaTime / moveDurationSeconds));
         if (Math.abs(1f - movementProgress) <= PROGRESS_TOLERANCE) {
             movementProgress = 1f;
             movementStartX = x;

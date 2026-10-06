@@ -7,6 +7,6 @@ public final class GameDesktopLauncher {
     public static void main(String[] args) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setWindowedMode(1280, 1024);
-        new Lwjgl3Application(new GameCycle(), config);
+        new Lwjgl3Application(new GdxGameApplication(new DefaultGameFactory()::create), config);
     }
 }

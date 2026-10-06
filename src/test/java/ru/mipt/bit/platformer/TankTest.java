@@ -9,7 +9,7 @@ import static ru.mipt.bit.platformer.Tank.MoveDirection.*;
 
 class TankTest {
     private final GameField field = new GameField(5, 4);
-    private final Tank tank = new Tank(1, 1);
+    private final Tank tank = new Tank(1, 1, 0.4f);
 
     TankTest() { field.addOccupant(tank); }
 
@@ -38,7 +38,7 @@ class TankTest {
 
     @ParameterizedTest @CsvSource({"LEFT,0,1", "RIGHT,4,1", "DOWN,1,0", "UP,1,3"})
     void blocksEachBoundary(Tank.MoveDirection direction, int x, int y) {
-        Tank edge = new Tank(x, y);
+        Tank edge = new Tank(x, y, 0.4f);
         field.addOccupant(edge);
         assertFalse(edge.tryMove(direction, field));
         assertEquals(x, edge.getX()); assertEquals(y, edge.getY());
@@ -54,7 +54,7 @@ class TankTest {
     }
 
     @Test void blockedByAnotherTank() {
-        field.addOccupant(new Tank(2, 1));
+        field.addOccupant(new Tank(2, 1, 0.4f));
         assertFalse(tank.tryMove(RIGHT, field));
         assertTrue(tank.tileOccupied(1, 1));
     }
@@ -86,7 +86,7 @@ class TankTest {
     }
 
     @Test void destinationBlocksOtherTankAndSourceIsImmediatelyFree() {
-        Tank rival = new Tank(3, 1); Tank follower = new Tank(0, 1);
+        Tank rival = new Tank(3, 1, 0.4f); Tank follower = new Tank(0, 1, 0.4f);
         field.addOccupant(rival); field.addOccupant(follower);
         assertTrue(tank.tryMove(RIGHT, field));
         assertFalse(rival.tryMove(LEFT, field));
@@ -97,5 +97,24 @@ class TankTest {
     @Test void invalidDirectionDoesNotCorruptState() {
         assertThrows(NullPointerException.class, () -> tank.tryMove(null, field));
         assertEquals(RIGHT, tank.getDirection()); assertTrue(tank.tileOccupied(1, 1));
+    }
+
+    @Test void durationIsConfiguredPerTank() {
+        Tank slower = new Tank(3, 1, 0.8f);
+        field.addOccupant(slower);
+        assertTrue(tank.tryMove(UP, field));
+        assertTrue(slower.tryMove(UP, field));
+        tank.update(0.2f);
+        slower.update(0.2f);
+        assertEquals(0.5f, tank.getMovementProgress());
+        assertEquals(0.25f, slower.getMovementProgress());
+        slower.update(0.6f);
+        assertFalse(slower.isMoving());
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = {0f, -1f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY})
+    void rejectsInvalidMoveDuration(float duration) {
+        assertThrows(IllegalArgumentException.class, () -> new Tank(1, 1, duration));
     }
 }
