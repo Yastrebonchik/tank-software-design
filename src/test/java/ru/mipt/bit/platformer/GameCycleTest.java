@@ -14,6 +14,7 @@ class GameCycleTest {
     private final FrameRenderer renderer = new FrameRenderer() {
         @Override public void prepareFrame() { calls.add("prepare"); }
         @Override public void render() { calls.add("render"); }
+        @Override public void resize(int width, int height) { calls.add("resize:" + width + ":" + height); }
         @Override public void dispose() { calls.add("dispose"); }
     };
     private final GameCycle cycle = new GameCycle(
@@ -36,9 +37,10 @@ class GameCycleTest {
                 assertEquals(0f, tank.getMovementProgress());
             }
             @Override public void render() { assertEquals(0.5f, tank.getMovementProgress()); }
+            @Override public void resize(int width, int height) { }
             @Override public void dispose() { }
         };
-        new GameCycle(() -> tank.tryMove(Tank.MoveDirection.RIGHT, field), tank, observer).tick(0.2f);
+        new GameCycle(() -> tank.tryMove(Direction.RIGHT, field), tank, observer).tick(0.2f);
     }
 
     @ParameterizedTest
@@ -59,5 +61,12 @@ class GameCycleTest {
         assertThrows(NullPointerException.class, () -> new GameCycle(null, dt -> {}, renderer));
         assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, null, renderer));
         assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, dt -> {}, null));
+    }
+
+    @Test void forwardsResizeWithoutAdvancingTheModelAndIgnoresItAfterDisposal() {
+        cycle.resize(800, 600);
+        cycle.dispose();
+        cycle.resize(1200, 800);
+        assertEquals(Arrays.asList("resize:800:600", "dispose"), calls);
     }
 }

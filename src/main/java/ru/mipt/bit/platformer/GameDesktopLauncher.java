@@ -5,8 +5,9 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 public final class GameDesktopLauncher {
     public static void main(String[] args) {
+        DefaultGameFactory factory = new DefaultGameFactory(LaunchOptions.parse(args).createLevelSource());
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setWindowedMode(1280, 1024);
-        new Lwjgl3Application(new GdxGameApplication(new DefaultGameFactory()::create), config);
+        new Lwjgl3Application(new GdxGameApplication(factory::create), config);
     }
 }

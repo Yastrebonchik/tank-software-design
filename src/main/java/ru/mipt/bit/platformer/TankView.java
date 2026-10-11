@@ -35,7 +35,7 @@ public final class TankView implements ObjectView {
         drawTextureRegionUnscaled(batch, graphics, rectangle, rotation(tank.getDirection()));
     }
 
-    private float rotation(Tank.MoveDirection direction) {
+    private float rotation(Direction direction) {
         switch (direction) {
             case UP: return 90f;
             case LEFT: return -180f;

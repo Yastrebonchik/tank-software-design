@@ -28,6 +28,10 @@ public final class GameCycle {
         renderer.render();
     }
 
+    public void resize(int width, int height) {
+        if (!disposed) { renderer.resize(width, height); }
+    }
+
     public void dispose() {
         if (!disposed) {
             disposed = true;

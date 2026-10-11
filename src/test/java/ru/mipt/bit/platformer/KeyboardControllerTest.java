@@ -45,14 +45,14 @@ class KeyboardControllerTest {
     @Test void successfulEarlierDirectionWins() {
         pressed.add(UP); pressed.add(LEFT); pressed.add(DOWN); pressed.add(RIGHT);
         controller.processInput(); assertTrue(tank.tileOccupied(1, 2));
-        assertEquals(Tank.MoveDirection.UP, tank.getDirection());
+        assertEquals(Direction.UP, tank.getDirection());
     }
 
     @Test void blockedEarlierDirectionAllowsNextDirection() {
         world.addOccupant(new Tree(1, 2));
         pressed.add(UP); pressed.add(LEFT);
         controller.processInput(); assertTrue(tank.tileOccupied(0, 1));
-        assertEquals(Tank.MoveDirection.LEFT, tank.getDirection());
+        assertEquals(Direction.LEFT, tank.getDirection());
     }
 
     @Test void newBindingWorksAndAlternativeKeysInvokeActionOnlyOnce() {
