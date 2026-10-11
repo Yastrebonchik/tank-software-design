@@ -3,10 +3,6 @@ package ru.mipt.bit.platformer;
 import java.util.Objects;
 
 public final class Tank implements CellOccupant, Updatable {
-    public enum MoveDirection {
-        UP, DOWN, LEFT, RIGHT
-    }
-
     private final float moveDurationSeconds;
     private static final float PROGRESS_TOLERANCE = 0.000001f;
 
@@ -14,7 +10,7 @@ public final class Tank implements CellOccupant, Updatable {
     private int y;
     private int movementStartX;
     private int movementStartY;
-    private MoveDirection direction = MoveDirection.RIGHT;
+    private Direction direction = Direction.RIGHT;
     private float movementProgress = 1f;
 
     public Tank(int x, int y, float moveDurationSeconds) {
@@ -28,27 +24,13 @@ public final class Tank implements CellOccupant, Updatable {
         movementStartY = y;
     }
 
-    public boolean tryMove(MoveDirection direction, GameField field) {
+    public boolean tryMove(Direction direction, GameField field) {
         if (isMoving()) {
             return false;
         }
         this.direction = Objects.requireNonNull(direction);
-        int targetX = x;
-        int targetY = y;
-        switch (direction) {
-            case UP:
-                targetY++;
-                break;
-            case DOWN:
-                targetY--;
-                break;
-            case LEFT:
-                targetX--;
-                break;
-            case RIGHT:
-                targetX++;
-                break;
-        }
+        int targetX = x + direction.getDeltaX();
+        int targetY = y + direction.getDeltaY();
 
         if (!field.isInside(targetX, targetY) || field.tileOccupied(targetX, targetY)) {
             return false;
@@ -100,7 +82,7 @@ public final class Tank implements CellOccupant, Updatable {
         return movementStartY;
     }
 
-    public MoveDirection getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 

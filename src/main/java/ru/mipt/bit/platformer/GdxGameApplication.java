@@ -25,6 +25,11 @@ public final class GdxGameApplication extends ApplicationAdapter {
     }
 
     @Override
+    public void resize(int width, int height) {
+        if (cycle != null) { cycle.resize(width, height); }
+    }
+
+    @Override
     public void dispose() {
         if (cycle != null) {
             cycle.dispose();

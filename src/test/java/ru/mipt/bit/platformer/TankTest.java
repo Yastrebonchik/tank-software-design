@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.mipt.bit.platformer.Tank.MoveDirection.*;
+import static ru.mipt.bit.platformer.Direction.*;
 
 class TankTest {
     private final GameField field = new GameField(5, 4);
@@ -27,7 +27,7 @@ class TankTest {
     }
 
     @ParameterizedTest @CsvSource({"UP,1,2", "DOWN,1,0", "LEFT,0,1", "RIGHT,2,1"})
-    void movesAndFieldImmediatelySeesNewPosition(Tank.MoveDirection direction, int x, int y) {
+    void movesAndFieldImmediatelySeesNewPosition(Direction direction, int x, int y) {
         assertTrue(tank.tryMove(direction, field));
         assertEquals(x, tank.getX()); assertEquals(y, tank.getY());
         assertEquals(direction, tank.getDirection());
@@ -37,7 +37,7 @@ class TankTest {
     }
 
     @ParameterizedTest @CsvSource({"LEFT,0,1", "RIGHT,4,1", "DOWN,1,0", "UP,1,3"})
-    void blocksEachBoundary(Tank.MoveDirection direction, int x, int y) {
+    void blocksEachBoundary(Direction direction, int x, int y) {
         Tank edge = new Tank(x, y, 0.4f);
         field.addOccupant(edge);
         assertFalse(edge.tryMove(direction, field));

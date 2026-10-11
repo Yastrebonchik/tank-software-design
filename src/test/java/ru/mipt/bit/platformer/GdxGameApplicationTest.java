@@ -18,6 +18,7 @@ class GdxGameApplicationTest {
                     new FrameRenderer() {
                         @Override public void prepareFrame() { calls.add("prepare"); }
                         @Override public void render() { calls.add("render"); }
+                        @Override public void resize(int width, int height) { calls.add("resize:" + width + ":" + height); }
                         @Override public void dispose() { calls.add("dispose"); }
                     });
         });
@@ -32,12 +33,13 @@ class GdxGameApplicationTest {
                 });
         try {
             application.create();
+            application.resize(800, 600);
             application.render();
             application.dispose();
             application.dispose();
         } finally {
             Gdx.graphics = previous;
         }
-        assertEquals(Arrays.asList("create", "input", "prepare", "update:0.125", "render", "dispose"), calls);
+        assertEquals(Arrays.asList("create", "resize:800:600", "input", "prepare", "update:0.125", "render", "dispose"), calls);
     }
 }
