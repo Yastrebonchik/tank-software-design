@@ -13,23 +13,34 @@ public final class LevelDefinition {
     private final int height;
     private final Position playerStart;
     private final List<Position> treePositions;
+    private final List<Position> botStarts;
 
     public LevelDefinition(int width, int height, Position playerStart, List<Position> treePositions) {
+        this(width, height, playerStart, treePositions, Collections.emptyList());
+    }
+
+    public LevelDefinition(int width, int height, Position playerStart,
+                           List<Position> treePositions, List<Position> botStarts) {
         cellCount(width, height);
         this.width = width;
         this.height = height;
         this.playerStart = Objects.requireNonNull(playerStart);
         checkInside(playerStart);
-        List<Position> copy = new ArrayList<>(Objects.requireNonNull(treePositions));
         Set<Position> occupied = new HashSet<>();
         occupied.add(playerStart);
+        this.treePositions = checkedCopy(treePositions, occupied);
+        this.botStarts = checkedCopy(botStarts, occupied);
+    }
+
+    private List<Position> checkedCopy(List<Position> positions, Set<Position> occupied) {
+        List<Position> copy = new ArrayList<>(Objects.requireNonNull(positions));
         for (Position position : copy) {
             checkInside(Objects.requireNonNull(position));
             if (!occupied.add(position)) {
                 throw new IllegalArgumentException("Overlapping objects at " + position);
             }
         }
-        this.treePositions = Collections.unmodifiableList(copy);
+        return Collections.unmodifiableList(copy);
     }
 
     static int cellCount(int width, int height) {
@@ -49,6 +60,7 @@ public final class LevelDefinition {
     public int getHeight() { return height; }
     public Position getPlayerStart() { return playerStart; }
     public List<Position> getTreePositions() { return treePositions; }
+    public List<Position> getBotStarts() { return botStarts; }
 
     public static final class Position {
         private final int x;

@@ -63,7 +63,9 @@ public final class Tank implements CellOccupant, Updatable {
 
     @Override
     public boolean tileOccupied(int x, int y) {
-        return this.x == x && this.y == y;
+        // The source stays occupied until the physical step has completed.
+        return (this.x == x && this.y == y)
+                || (isMoving() && movementStartX == x && movementStartY == y);
     }
 
     public int getX() {

@@ -13,7 +13,7 @@ public final class KeyboardController implements InputHandler {
         this.isKeyPressed = Objects.requireNonNull(isKeyPressed);
     }
 
-    public void bind(Runnable action, int... keys) {
+    public void bind(GameCommand action, int... keys) {
         if (keys.length == 0) {
             throw new IllegalArgumentException("A binding needs at least one key");
         }
@@ -25,7 +25,7 @@ public final class KeyboardController implements InputHandler {
         for (Binding binding : bindings) {
             for (int key : binding.keys) {
                 if (isKeyPressed.test(key)) {
-                    binding.action.run();
+                    binding.action.execute();
                     break;
                 }
             }
@@ -33,10 +33,10 @@ public final class KeyboardController implements InputHandler {
     }
 
     private static final class Binding {
-        private final Runnable action;
+        private final GameCommand action;
         private final int[] keys;
 
-        private Binding(Runnable action, int[] keys) {
+        private Binding(GameCommand action, int[] keys) {
             this.action = action;
             this.keys = keys;
         }

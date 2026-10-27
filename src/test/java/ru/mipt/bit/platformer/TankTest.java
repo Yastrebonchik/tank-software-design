@@ -33,7 +33,7 @@ class TankTest {
         assertEquals(direction, tank.getDirection());
         assertEquals(1, tank.getMovementStartX()); assertEquals(1, tank.getMovementStartY());
         assertEquals(0f, tank.getMovementProgress()); assertTrue(tank.isMoving());
-        assertTrue(field.tileOccupied(x, y)); assertFalse(field.tileOccupied(1, 1));
+        assertTrue(field.tileOccupied(x, y)); assertTrue(field.tileOccupied(1, 1));
     }
 
     @ParameterizedTest @CsvSource({"LEFT,0,1", "RIGHT,4,1", "DOWN,1,0", "UP,1,3"})
@@ -85,13 +85,43 @@ class TankTest {
         assertEquals(1f, tank.getMovementProgress());
     }
 
-    @Test void destinationBlocksOtherTankAndSourceIsImmediatelyFree() {
+    @Test void bothCellsBlockOthersUntilTheStepCompletes() {
         Tank rival = new Tank(3, 1, 0.4f); Tank follower = new Tank(0, 1, 0.4f);
         field.addOccupant(rival); field.addOccupant(follower);
         assertTrue(tank.tryMove(RIGHT, field));
         assertFalse(rival.tryMove(LEFT, field));
+        assertFalse(follower.tryMove(RIGHT, field));
+        tank.update(0.2f);
+        assertTrue(tank.tileOccupied(1, 1));
+        assertTrue(tank.tileOccupied(2, 1));
+        assertFalse(follower.tryMove(RIGHT, field));
+        tank.update(0.2f);
+        assertFalse(tank.tileOccupied(1, 1));
+        assertFalse(rival.tryMove(LEFT, field));
         assertTrue(follower.tryMove(RIGHT, field));
         assertTrue(follower.tileOccupied(1, 1));
+    }
+
+    @Test void adjacentTanksCannotSwapCells() {
+        Tank other = new Tank(2, 1, 0.4f);
+        field.addOccupant(other);
+        assertFalse(tank.tryMove(RIGHT, field));
+        assertFalse(other.tryMove(LEFT, field));
+        assertFalse(tank.isMoving()); assertFalse(other.isMoving());
+    }
+
+    @Test void sourceIsFreedOnlyWhenTheStepCompletesInEveryDirection() {
+        for (Direction direction : Direction.values()) {
+            Tank moving = new Tank(2, 2, 1f);
+            GameField empty = new GameField(5, 5);
+            empty.addOccupant(moving);
+            assertTrue(moving.tryMove(direction, empty));
+            moving.update(0.999f);
+            assertTrue(moving.tileOccupied(2, 2));
+            moving.update(1f);
+            assertFalse(moving.tileOccupied(2, 2));
+            assertTrue(moving.tileOccupied(2 + direction.getDeltaX(), 2 + direction.getDeltaY()));
+        }
     }
 
     @Test void invalidDirectionDoesNotCorruptState() {

@@ -8,9 +8,9 @@ public final class PlayerKeyBindings {
     }
 
     public static void install(KeyboardController controller, Tank player, GameField field) {
-        controller.bind(() -> player.tryMove(Direction.UP, field), UP, W);
-        controller.bind(() -> player.tryMove(Direction.LEFT, field), LEFT, A);
-        controller.bind(() -> player.tryMove(Direction.DOWN, field), DOWN, S);
-        controller.bind(() -> player.tryMove(Direction.RIGHT, field), RIGHT, D);
+        controller.bind(new MoveTankCommand(player, field, Direction.UP), UP, W);
+        controller.bind(new MoveTankCommand(player, field, Direction.LEFT), LEFT, A);
+        controller.bind(new MoveTankCommand(player, field, Direction.DOWN), DOWN, S);
+        controller.bind(new MoveTankCommand(player, field, Direction.RIGHT), RIGHT, D);
     }
 }

@@ -15,6 +15,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import ru.mipt.bit.platformer.level.LevelDefinition;
 import ru.mipt.bit.platformer.level.LevelSource;
 import ru.mipt.bit.platformer.util.TileMovement;
@@ -24,9 +25,15 @@ import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 /** The one place that selects concrete objects, assets and default controls. */
 public final class DefaultGameFactory {
     private final LevelSource levelSource;
+    private final Random aiRandom;
 
     public DefaultGameFactory(LevelSource levelSource) {
+        this(levelSource, new Random());
+    }
+
+    public DefaultGameFactory(LevelSource levelSource, Random aiRandom) {
         this.levelSource = Objects.requireNonNull(levelSource);
+        this.aiRandom = Objects.requireNonNull(aiRandom);
     }
 
     public GameCycle create() {
@@ -59,7 +66,8 @@ public final class DefaultGameFactory {
             GameRenderer renderer = new GameRenderer(batch, mapRenderer,
                     new FitViewport((float) ground.getWidth() * ground.getTileWidth(),
                             (float) ground.getHeight() * ground.getTileHeight()), resources);
-            renderer.addView(new TankView(player, new TextureRegion(tankTexture),
+            TextureRegion tankGraphics = new TextureRegion(tankTexture);
+            renderer.addView(new TankView(player, tankGraphics,
                     new TileMovement(ground, Interpolation.smooth)));
             TextureRegion treeGraphics = new TextureRegion(treeTexture);
             for (LevelDefinition.Position position : definition.getTreePositions()) {
@@ -70,7 +78,17 @@ public final class DefaultGameFactory {
 
             KeyboardController input = new KeyboardController(key -> Gdx.input.isKeyPressed(key));
             PlayerKeyBindings.install(input, player, field);
-            return new GameCycle(input, world, renderer);
+            List<InputHandler> controllers = new ArrayList<>();
+            controllers.add(input);
+            for (LevelDefinition.Position position : definition.getBotStarts()) {
+                Tank bot = new Tank(position.getX(), position.getY(), 0.4f);
+                world.addOccupant(bot);
+                world.addUpdatable(bot);
+                renderer.addView(new TankView(bot, tankGraphics,
+                        new TileMovement(ground, Interpolation.smooth)));
+                controllers.add(new RandomTankController(bot, field, new Random(aiRandom.nextLong())));
+            }
+            return new GameCycle(new CompositeInputHandler(controllers), world, renderer);
         } catch (RuntimeException | Error failure) {
             for (int i = resources.size() - 1; i >= 0; i--) {
                 try {
