@@ -15,8 +15,6 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.NoSuchElementException;
 
-import static com.badlogic.gdx.math.MathUtils.clamp;
-
 public final class GdxGameUtils {
 
     private GdxGameUtils() {
@@ -52,22 +50,6 @@ public final class GdxGameUtils {
         return rectangle.setCenter(tileCenter);
     }
 
-    public static GridPoint2 incrementedY(GridPoint2 point) {
-        return new GridPoint2(point).add(0, 1);
-    }
-
-    public static GridPoint2 decrementedX(GridPoint2 point) {
-        return new GridPoint2(point).sub(1, 0);
-    }
-
-    public static GridPoint2 decrementedY(GridPoint2 point) {
-        return new GridPoint2(point).sub(0, 1);
-    }
-
-    public static GridPoint2 incrementedX(GridPoint2 point) {
-        return new GridPoint2(point).add(1, 0);
-    }
-
     public static void drawTextureRegionUnscaled(Batch batch, TextureRegion region, Rectangle rectangle, float rotation) {
         int regionWidth = region.getRegionWidth();
         int regionHeight = region.getRegionHeight();
@@ -80,10 +62,6 @@ public final class GdxGameUtils {
         return new Rectangle()
                 .setWidth(region.getRegionWidth())
                 .setHeight(region.getRegionHeight());
-    }
-
-    public static float continueProgress(float previousProgress, float deltaTime, float speed) {
-        return clamp(previousProgress + deltaTime / speed, 0f, 1f);
     }
 
     private static Vector2 calculateTileCenter(TiledMapTileLayer tileLayer, GridPoint2 tileCoordinates) {
