@@ -38,6 +38,13 @@ public final class GameRenderer implements FrameRenderer {
         views.add(Objects.requireNonNull(view));
     }
 
+    public void removeView(ObjectView view) { views.removeIf(registered -> registered == view); }
+
+    public void addResource(Disposable resource) {
+        Objects.requireNonNull(resource);
+        if (resources.stream().noneMatch(registered -> registered == resource)) { resources.add(resource); }
+    }
+
     @Override
     public void prepareFrame() {
         for (ObjectView view : views) {

@@ -26,34 +26,38 @@ class CompositeInputHandlerTest {
         Tank player = new Tank(0, 0, 0.4f), bot = new Tank(2, 0, 0.4f);
         world.addOccupant(player); world.addUpdatable(player);
         world.addOccupant(bot); world.addUpdatable(bot);
-        KeyboardController keyboard = new KeyboardController(key -> key == D);
-        PlayerKeyBindings.install(keyboard, player, field);
+        CommandQueue commands = new CommandQueue();
+        KeyboardController keyboard = new KeyboardController(key -> key == D, commands);
+        PlayerKeyBindings.install(keyboard, player, world);
         GameCommand botMove = new MoveTankCommand(bot, field, Direction.LEFT);
         InputHandler bots = () -> {
-            assertEquals(0f, player.getMovementProgress());
-            botMove.execute();
+            assertFalse(player.isMoving());
+            assertEquals(0, player.getX());
+            commands.submit(botMove);
         };
         FrameRenderer observer = new FrameRenderer() {
             public void prepareFrame() {
                 assertTrue(player.isMoving()); assertFalse(bot.isMoving());
                 assertEquals(Direction.LEFT, bot.getDirection());
-                assertEquals(0f, player.getMovementProgress());
+                assertEquals(0.5f, player.getMovementProgress());
             }
             public void render() { assertEquals(0.5f, player.getMovementProgress()); }
             public void resize(int width, int height) { }
             public void dispose() { }
         };
-        new GameCycle(new CompositeInputHandler(Arrays.asList(keyboard, bots)), world, observer).tick(0.2f);
+        new GameCycle(new CompositeInputHandler(Arrays.asList(keyboard, bots)), commands, world, observer).tick(0.2f);
         assertEquals(1, player.getX()); assertEquals(2, bot.getX());
     }
 
     @Test void keyboardDoesNotControlOtherTanks() {
         GameField field = new GameField(5, 5);
         Tank player = new Tank(0, 0, 0.4f), bot = new Tank(3, 3, 0.4f);
-        field.addOccupant(player); field.addOccupant(bot);
-        KeyboardController keyboard = new KeyboardController(key -> key == D);
-        PlayerKeyBindings.install(keyboard, player, field);
-        keyboard.processInput();
+        GameWorld world = new GameWorld(field);
+        world.addObject(player); world.addObject(bot);
+        CommandQueue commands = new CommandQueue();
+        KeyboardController keyboard = new KeyboardController(key -> key == D, commands);
+        PlayerKeyBindings.install(keyboard, player, world);
+        keyboard.processInput(); commands.executePending();
         assertTrue(player.isMoving()); assertFalse(bot.isMoving());
         assertEquals(3, bot.getX()); assertEquals(3, bot.getY());
     }

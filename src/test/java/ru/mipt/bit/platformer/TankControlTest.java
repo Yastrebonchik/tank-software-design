@@ -1,6 +1,9 @@
 package ru.mipt.bit.platformer;
 
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -15,7 +18,7 @@ class TankControlTest {
     @ParameterizedTest @EnumSource(Direction.class)
     void commandsAndAiUseTheChosenDirection(Direction direction) {
         CountingRandom random = new CountingRandom(direction);
-        new RandomTankController(tank, field, random).processInput();
+        controller(tank, random).processInput();
         assertEquals(2 + direction.getDeltaX(), tank.getX());
         assertEquals(2 + direction.getDeltaY(), tank.getY());
         assertEquals(direction, tank.getDirection());
@@ -38,7 +41,7 @@ class TankControlTest {
 
     @Test void aiDoesNotChooseAnotherDirectionWhileMoving() {
         CountingRandom random = new CountingRandom(Direction.RIGHT);
-        RandomTankController controller = new RandomTankController(tank, field, random);
+        InputHandler controller = controller(tank, random);
         controller.processInput(); tank.update(0.2f);
         controller.processInput(); controller.processInput();
         assertEquals(1, random.calls); assertEquals(3, tank.getX());
@@ -54,7 +57,7 @@ class TankControlTest {
                 return (calls++ == 0 ? Direction.RIGHT : Direction.UP).ordinal();
             }
         };
-        RandomTankController controller = new RandomTankController(tank, field, random);
+        InputHandler controller = controller(tank, random);
         controller.processInput();
         assertFalse(tank.isMoving()); assertEquals(Direction.RIGHT, tank.getDirection());
         controller.processInput();
@@ -66,7 +69,7 @@ class TankControlTest {
         Tank edge = new Tank(direction == Direction.LEFT ? 0 : direction == Direction.RIGHT ? 4 : 2,
                 direction == Direction.DOWN ? 0 : direction == Direction.UP ? 4 : 2, 0.4f);
         field.addOccupant(edge);
-        new RandomTankController(edge, field, new CountingRandom(direction)).processInput();
+        controller(edge, new CountingRandom(direction)).processInput();
         assertFalse(edge.isMoving());
         assertTrue(field.isInside(edge.getX(), edge.getY()));
     }
@@ -75,9 +78,19 @@ class TankControlTest {
         assertThrows(NullPointerException.class, () -> new MoveTankCommand(null, field, Direction.UP));
         assertThrows(NullPointerException.class, () -> new MoveTankCommand(tank, null, Direction.UP));
         assertThrows(NullPointerException.class, () -> new MoveTankCommand(tank, field, null));
-        assertThrows(NullPointerException.class, () -> new RandomTankController(null, field, new Random()));
-        assertThrows(NullPointerException.class, () -> new RandomTankController(tank, null, new Random()));
-        assertThrows(NullPointerException.class, () -> new RandomTankController(tank, field, null));
+        assertThrows(NullPointerException.class, () -> new RandomTankController(null, Collections.singletonList(() -> {}), new Random(), new CommandQueue()));
+        assertThrows(NullPointerException.class, () -> new RandomTankController(tank, null, new Random(), new CommandQueue()));
+        assertThrows(NullPointerException.class, () -> new RandomTankController(tank, Collections.singletonList(() -> {}), null, new CommandQueue()));
+    }
+
+    private InputHandler controller(Tank receiver, Random random) {
+        CommandQueue commands = new CommandQueue();
+        List<GameCommand> actions = new ArrayList<>();
+        for (Direction direction : Direction.values()) {
+            actions.add(new MoveTankCommand(receiver, field, direction));
+        }
+        RandomTankController controller = new RandomTankController(receiver, actions, random, commands);
+        return () -> { controller.processInput(); commands.executePending(); };
     }
 
     private static final class CountingRandom extends Random {

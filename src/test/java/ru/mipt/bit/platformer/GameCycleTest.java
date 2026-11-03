@@ -17,30 +17,32 @@ class GameCycleTest {
         @Override public void resize(int width, int height) { calls.add("resize:" + width + ":" + height); }
         @Override public void dispose() { calls.add("dispose"); }
     };
+    private final CommandQueue commands = new CommandQueue();
     private final GameCycle cycle = new GameCycle(
-            () -> calls.add("input"), dt -> calls.add("update:" + dt), renderer);
+            () -> { calls.add("input"); commands.submit(() -> calls.add("command")); }, commands, dt -> calls.add("update:" + dt), renderer);
 
-    @Test void coordinatesFramesThroughInterfacesInTheOriginalOrder() {
+    @Test void collectsCommandsExecutesThemUpdatesAndThenRenders() {
         cycle.tick(0.2f);
         cycle.tick(0f);
-        assertEquals(Arrays.asList("input", "prepare", "update:0.2", "render",
-                "input", "prepare", "update:0.0", "render"), calls);
+        assertEquals(Arrays.asList("input", "command", "update:0.2", "prepare", "render",
+                "input", "command", "update:0.0", "prepare", "render"), calls);
     }
 
-    @Test void preparesTheAcceptedMoveBeforeUpdatingItsProgress() {
+    @Test void rendersTheCurrentModelAfterExecutingCommandsAndUpdating() {
         GameField field = new GameField(4, 4);
         Tank tank = new Tank(1, 1, 0.4f);
         field.addOccupant(tank);
         FrameRenderer observer = new FrameRenderer() {
             @Override public void prepareFrame() {
                 assertTrue(tank.tileOccupied(2, 1));
-                assertEquals(0f, tank.getMovementProgress());
+                assertEquals(0.5f, tank.getMovementProgress());
             }
             @Override public void render() { assertEquals(0.5f, tank.getMovementProgress()); }
             @Override public void resize(int width, int height) { }
             @Override public void dispose() { }
         };
-        new GameCycle(() -> tank.tryMove(Direction.RIGHT, field), tank, observer).tick(0.2f);
+        new GameCycle(() -> commands.submit(new MoveTankCommand(tank, field, Direction.RIGHT)),
+                commands, tank, observer).tick(0.2f);
     }
 
     @ParameterizedTest
@@ -58,9 +60,10 @@ class GameCycleTest {
     }
 
     @Test void rejectsMissingDependencies() {
-        assertThrows(NullPointerException.class, () -> new GameCycle(null, dt -> {}, renderer));
-        assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, null, renderer));
-        assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, dt -> {}, null));
+        assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, null, dt -> {}, renderer));
+        assertThrows(NullPointerException.class, () -> new GameCycle(null, commands, dt -> {}, renderer));
+        assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, commands, null, renderer));
+        assertThrows(NullPointerException.class, () -> new GameCycle(() -> {}, commands, dt -> {}, null));
     }
 
     @Test void forwardsResizeWithoutAdvancingTheModelAndIgnoresItAfterDisposal() {
