@@ -18,18 +18,21 @@ class MultiTankSimulationTest {
         GameWorld world = new GameWorld(field);
         List<Tank> tanks = new ArrayList<>();
         List<InputHandler> controls = new ArrayList<>();
+        CommandQueue commands = new CommandQueue();
         List<LevelDefinition.Position> starts = new ArrayList<>(level.getBotStarts());
         starts.add(level.getPlayerStart());
         for (LevelDefinition.Position position : starts) {
             Tank tank = new Tank(position.getX(), position.getY(), 0.4f);
             tanks.add(tank); world.addOccupant(tank); world.addUpdatable(tank);
-            controls.add(new RandomTankController(tank, field, new Random(seed + tanks.size())));
+            List<GameCommand> actions = new ArrayList<>();
+            for (Direction direction : Direction.values()) { actions.add(new MoveTankCommand(tank, field, direction)); }
+            controls.add(new RandomTankController(tank, actions, new Random(seed + tanks.size()), commands));
         }
         for (LevelDefinition.Position tree : level.getTreePositions()) { world.addOccupant(new Tree(tree.getX(), tree.getY())); }
         CompositeInputHandler input = new CompositeInputHandler(controls);
         boolean moved = false;
         for (int frame = 0; frame < 1000; frame++) {
-            input.processInput();
+            input.processInput(); commands.executePending();
             verifyNoOverlap(field, tanks, level);
             moved |= tanks.stream().anyMatch(Tank::isMoving);
             world.update(frame % 7 == 0 ? 0.5f : 0.1f);

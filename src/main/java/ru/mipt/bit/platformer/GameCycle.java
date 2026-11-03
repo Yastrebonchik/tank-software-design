@@ -5,12 +5,14 @@ import java.util.Objects;
 /** Coordinates a frame without depending on a window or a graphics library. */
 public final class GameCycle {
     private final InputHandler input;
+    private final CommandQueue commands;
     private final Updatable world;
     private final FrameRenderer renderer;
     private boolean disposed;
 
-    public GameCycle(InputHandler input, Updatable world, FrameRenderer renderer) {
+    public GameCycle(InputHandler input, CommandQueue commands, Updatable world, FrameRenderer renderer) {
         this.input = Objects.requireNonNull(input);
+        this.commands = Objects.requireNonNull(commands);
         this.world = Objects.requireNonNull(world);
         this.renderer = Objects.requireNonNull(renderer);
     }
@@ -23,8 +25,9 @@ public final class GameCycle {
             throw new IllegalArgumentException("deltaTime must be finite and non-negative");
         }
         input.processInput();
-        renderer.prepareFrame();
+        commands.executePending();
         world.update(deltaTime);
+        renderer.prepareFrame();
         renderer.render();
     }
 

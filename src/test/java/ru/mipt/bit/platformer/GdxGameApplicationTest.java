@@ -14,7 +14,7 @@ class GdxGameApplicationTest {
         List<String> calls = new ArrayList<>();
         GdxGameApplication application = new GdxGameApplication(() -> {
             calls.add("create");
-            return new GameCycle(() -> calls.add("input"), dt -> calls.add("update:" + dt),
+            return new GameCycle(() -> calls.add("input"), new CommandQueue(), dt -> calls.add("update:" + dt),
                     new FrameRenderer() {
                         @Override public void prepareFrame() { calls.add("prepare"); }
                         @Override public void render() { calls.add("render"); }
@@ -40,6 +40,6 @@ class GdxGameApplicationTest {
         } finally {
             Gdx.graphics = previous;
         }
-        assertEquals(Arrays.asList("create", "resize:800:600", "input", "prepare", "update:0.125", "render", "dispose"), calls);
+        assertEquals(Arrays.asList("create", "resize:800:600", "input", "update:0.125", "prepare", "render", "dispose"), calls);
     }
 }

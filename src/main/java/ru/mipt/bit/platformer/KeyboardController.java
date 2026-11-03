@@ -7,10 +7,12 @@ import java.util.function.IntPredicate;
 
 public final class KeyboardController implements InputHandler {
     private final IntPredicate isKeyPressed;
+    private final CommandQueue commands;
     private final List<Binding> bindings = new ArrayList<>();
 
-    public KeyboardController(IntPredicate isKeyPressed) {
+    public KeyboardController(IntPredicate isKeyPressed, CommandQueue commands) {
         this.isKeyPressed = Objects.requireNonNull(isKeyPressed);
+        this.commands = Objects.requireNonNull(commands);
     }
 
     public void bind(GameCommand action, int... keys) {
@@ -25,7 +27,7 @@ public final class KeyboardController implements InputHandler {
         for (Binding binding : bindings) {
             for (int key : binding.keys) {
                 if (isKeyPressed.test(key)) {
-                    binding.action.execute();
+                    commands.submit(binding.action);
                     break;
                 }
             }
