@@ -22,6 +22,7 @@ import ru.mipt.bit.platformer.level.LevelSource;
 import ru.mipt.bit.platformer.util.TileMovement;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
+import static com.badlogic.gdx.Input.Keys.L;
 
 /** The one place that selects concrete objects, assets and default controls. */
 public final class DefaultGameFactory {
@@ -60,6 +61,8 @@ public final class DefaultGameFactory {
 
             Texture bulletTexture = createBulletTexture();
             resources.add(bulletTexture);
+            Texture healthBarTexture = createHealthBarTexture();
+            resources.add(healthBarTexture);
             GameField field = new GameField(definition.getWidth(), definition.getHeight());
             GameWorld world = new GameWorld(field);
             CommandQueue commands = new CommandQueue();
@@ -71,8 +74,13 @@ public final class DefaultGameFactory {
             TextureRegion treeGraphics = new TextureRegion(treeTexture);
             TextureRegion bulletGraphics = new TextureRegion(bulletTexture);
             ObjectViewFactory views = new ObjectViewFactory();
-            views.register(Tank.class, tank -> new TankView(tank, tankGraphics,
-                    new TileMovement(ground, Interpolation.smooth)));
+            HealthBarVisibility healthBars = new HealthBarVisibility();
+            TextureRegion healthBarGraphics = new TextureRegion(healthBarTexture);
+            views.register(Tank.class, tank -> new HealthBarDecorator(
+                    new TankView(tank, tankGraphics, new TileMovement(ground, Interpolation.smooth)),
+                    tank, healthBars, healthBarGraphics,
+                    (float) ground.getWidth() * ground.getTileWidth(),
+                    (float) ground.getHeight() * ground.getTileHeight()));
             views.register(Tree.class, tree -> new TreeView(tree, treeGraphics, ground));
             views.register(Bullet.class, bullet -> new BulletView(bullet, bulletGraphics, ground));
             WorldViewListener graphics = new WorldViewListener(world, renderer, views);
@@ -87,6 +95,7 @@ public final class DefaultGameFactory {
             }
             KeyboardController input = new KeyboardController(key -> Gdx.input.isKeyPressed(key), commands);
             PlayerKeyBindings.install(input, player, world);
+            input.bindOnPress(new ToggleHealthBarsCommand(healthBars), L);
             List<InputHandler> controllers = new ArrayList<>();
             controllers.add(input);
             for (LevelDefinition.Position position : definition.getBotStarts()) {
@@ -108,6 +117,15 @@ public final class DefaultGameFactory {
             }
             throw failure;
         }
+    }
+
+    private Texture createHealthBarTexture() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        try {
+            pixmap.setColor(1f, 1f, 1f, 1f);
+            pixmap.fill();
+            return new Texture(pixmap);
+        } finally { pixmap.dispose(); }
     }
 
     private Texture createBulletTexture() {

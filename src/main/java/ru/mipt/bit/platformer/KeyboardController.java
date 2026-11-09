@@ -16,31 +16,50 @@ public final class KeyboardController implements InputHandler {
     }
 
     public void bind(GameCommand action, int... keys) {
+        bind(action, Trigger.WHILE_HELD, keys);
+    }
+
+    /** Executes once when any bound key becomes pressed, then waits for release. */
+    public void bindOnPress(GameCommand action, int... keys) {
+        bind(action, Trigger.ON_PRESS, keys);
+    }
+
+    private void bind(GameCommand action, Trigger trigger, int... keys) {
         if (keys.length == 0) {
             throw new IllegalArgumentException("A binding needs at least one key");
         }
-        bindings.add(new Binding(Objects.requireNonNull(action), keys.clone()));
+        bindings.add(new Binding(Objects.requireNonNull(action), keys.clone(), trigger));
     }
 
     @Override
     public void processInput() {
         for (Binding binding : bindings) {
+            boolean pressed = false;
             for (int key : binding.keys) {
                 if (isKeyPressed.test(key)) {
-                    commands.submit(binding.action);
+                    pressed = true;
                     break;
                 }
             }
+            if (pressed && (binding.trigger == Trigger.WHILE_HELD || !binding.wasPressed)) {
+                commands.submit(binding.action);
+            }
+            binding.wasPressed = pressed;
         }
     }
+
+    private enum Trigger { WHILE_HELD, ON_PRESS }
 
     private static final class Binding {
         private final GameCommand action;
         private final int[] keys;
+        private final Trigger trigger;
+        private boolean wasPressed;
 
-        private Binding(GameCommand action, int[] keys) {
+        private Binding(GameCommand action, int[] keys, Trigger trigger) {
             this.action = action;
             this.keys = keys;
+            this.trigger = trigger;
         }
     }
 }
