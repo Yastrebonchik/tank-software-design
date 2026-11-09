@@ -8,7 +8,7 @@ import ru.mipt.bit.platformer.util.TileMovement;
 import java.util.Objects;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
-public final class TankView implements ObjectView {
+public final class TankView implements PositionedObjectView {
     private final Tank tank;
     private final TextureRegion graphics;
     private final TileMovement tileMovement;
@@ -34,6 +34,11 @@ public final class TankView implements ObjectView {
     public void render(Batch batch) {
         drawTextureRegionUnscaled(batch, graphics, rectangle, rotation(tank.getDirection()));
     }
+
+    @Override public float getX() { return rectangle.x; }
+    @Override public float getY() { return rectangle.y; }
+    @Override public float getWidth() { return rectangle.width; }
+    @Override public float getHeight() { return rectangle.height; }
 
     private float rotation(Direction direction) {
         switch (direction) {

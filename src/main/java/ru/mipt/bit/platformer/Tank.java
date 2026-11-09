@@ -2,7 +2,7 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
-public final class Tank implements CellOccupant, Updatable, Damageable {
+public final class Tank implements CellOccupant, Updatable, Damageable, HealthStatus {
     private final float moveDurationSeconds;
     private final CombatSettings combat;
     private int health;
@@ -70,7 +70,8 @@ public final class Tank implements CellOccupant, Updatable, Damageable {
     }
 
     @Override public boolean isAlive() { return health > 0; }
-    public int getHealth() { return health; }
+    @Override public int getHealth() { return health; }
+    @Override public int getMaxHealth() { return combat.getHealth(); }
     public float getReloadRemaining() { return reloadRemaining; }
 
     @Override
