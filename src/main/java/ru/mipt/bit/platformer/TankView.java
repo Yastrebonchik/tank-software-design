@@ -8,6 +8,7 @@ import ru.mipt.bit.platformer.util.TileMovement;
 import java.util.Objects;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
+/** Graphics adapter component; reads Tank state and draws its sprite. */
 public final class TankView implements PositionedObjectView {
     private final Tank tank;
     private final TextureRegion graphics;

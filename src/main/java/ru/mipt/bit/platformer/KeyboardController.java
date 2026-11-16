@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.IntPredicate;
 
+/** Incoming input adapter; translates an injected key-state predicate into application commands. */
 public final class KeyboardController implements InputHandler {
     private final IntPredicate isKeyPressed;
     private final CommandQueue commands;

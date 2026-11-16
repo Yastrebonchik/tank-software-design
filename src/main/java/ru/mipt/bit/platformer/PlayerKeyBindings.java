@@ -2,7 +2,10 @@ package ru.mipt.bit.platformer;
 
 import static com.badlogic.gdx.Input.Keys.*;
 
-/** Default desktop controls belong to game configuration, not input dispatch. */
+/**
+ * Desktop input configuration; binds LibGDX key codes to application commands.
+ * <p>Default desktop controls belong to game configuration, not input dispatch.
+ */
 public final class PlayerKeyBindings {
     private PlayerKeyBindings() {
     }

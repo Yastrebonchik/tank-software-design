@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 
+/** Outgoing graphics adapter for FrameRenderer; owns LibGDX resources and object views. */
 public final class GameRenderer implements FrameRenderer {
     private final Batch batch;
     private final Viewport viewport;

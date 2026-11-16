@@ -2,7 +2,10 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
-/** A projectile traverses every crossed cell, even during a long frame. */
+/**
+ * Domain entity; resolves cell collisions and damage through GameWorld.
+ * <p>A projectile traverses every crossed cell, even during a long frame.
+ */
 public final class Bullet implements CellOccupant, Updatable, Damageable {
     private int x;
     private int y;

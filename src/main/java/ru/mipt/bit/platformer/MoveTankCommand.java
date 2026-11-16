@@ -2,7 +2,10 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
-/** Both keyboard and AI use the same movement rules of the receiver. */
+/**
+ * Application action; delegates movement rules to its Tank receiver.
+ * <p>Both keyboard and AI use the same movement rules of the receiver.
+ */
 public final class MoveTankCommand implements GameCommand {
     private final Tank tank;
     private final GameField field;

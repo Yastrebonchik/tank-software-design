@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import ru.mipt.bit.platformer.level.LevelDefinition.Position;
 
+/** Filesystem adapter for LevelSource; reads and validates a text level. */
 public final class FileLevelSource implements LevelSource {
     private final Path path;
 

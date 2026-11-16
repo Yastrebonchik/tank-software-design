@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Supplier;
 import ru.mipt.bit.platformer.level.LevelDefinition;
 import ru.mipt.bit.platformer.level.LevelSource;
 import ru.mipt.bit.platformer.util.TileMovement;
@@ -24,8 +25,15 @@ import ru.mipt.bit.platformer.util.TileMovement;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 import static com.badlogic.gdx.Input.Keys.L;
 
-/** The one place that selects concrete objects, assets and default controls. */
+/**
+ * Composition root; wires domain objects, application services and concrete adapters.
+ * <p>The one place that selects concrete objects, assets and default controls.
+ */
 public final class DefaultGameFactory {
+    private static final float DEFAULT_MOVE_DURATION_SECONDS = 0.4f;
+    private final float moveDurationSeconds;
+    private final CombatSettings combat;
+    private final Supplier<? extends TankStatePolicy> statePolicies;
     private final LevelSource levelSource;
     private final Random aiRandom;
 
@@ -34,6 +42,26 @@ public final class DefaultGameFactory {
     }
 
     public DefaultGameFactory(LevelSource levelSource, Random aiRandom) {
+        this(levelSource, aiRandom, CombatSettings.DEFAULT);
+    }
+
+    public DefaultGameFactory(LevelSource levelSource, Random aiRandom, CombatSettings combat) {
+        this(levelSource, aiRandom, DEFAULT_MOVE_DURATION_SECONDS, combat);
+    }
+
+    public DefaultGameFactory(LevelSource levelSource, Random aiRandom, float moveDurationSeconds, CombatSettings combat) {
+        this(levelSource, aiRandom, moveDurationSeconds, combat, HealthTankStateResolver::new);
+    }
+
+    /** Supply a fresh policy for each tank if the policy keeps mutable per-tank conditions. */
+    public DefaultGameFactory(LevelSource levelSource, Random aiRandom, float moveDurationSeconds,
+                              CombatSettings combat, Supplier<? extends TankStatePolicy> statePolicies) {
+        this.statePolicies = Objects.requireNonNull(statePolicies);
+        if (!Float.isFinite(moveDurationSeconds) || moveDurationSeconds <= 0f) {
+            throw new IllegalArgumentException("Move duration must be finite and positive");
+        }
+        this.moveDurationSeconds = moveDurationSeconds;
+        this.combat = Objects.requireNonNull(combat);
         this.levelSource = Objects.requireNonNull(levelSource);
         this.aiRandom = Objects.requireNonNull(aiRandom);
     }
@@ -88,7 +116,7 @@ public final class DefaultGameFactory {
             resources.add(graphics);
 
             // Subscribe before adding any models, including the initial scene.
-            Tank player = new Tank(definition.getPlayerStart().getX(), definition.getPlayerStart().getY(), 0.4f);
+            Tank player = new Tank(definition.getPlayerStart().getX(), definition.getPlayerStart().getY(), moveDurationSeconds, combat, statePolicies.get());
             world.addObject(player);
             for (LevelDefinition.Position position : definition.getTreePositions()) {
                 world.addObject(new Tree(position.getX(), position.getY()));
@@ -99,7 +127,7 @@ public final class DefaultGameFactory {
             List<InputHandler> controllers = new ArrayList<>();
             controllers.add(input);
             for (LevelDefinition.Position position : definition.getBotStarts()) {
-                Tank bot = new Tank(position.getX(), position.getY(), 0.4f);
+                Tank bot = new Tank(position.getX(), position.getY(), moveDurationSeconds, combat, statePolicies.get());
                 world.addObject(bot);
                 List<GameCommand> actions = new ArrayList<>();
                 for (Direction direction : Direction.values()) { actions.add(new MoveTankCommand(bot, field, direction)); }

@@ -11,7 +11,10 @@ import java.util.Set;
 import ru.mipt.bit.platformer.Direction;
 import ru.mipt.bit.platformer.level.LevelDefinition.Position;
 
-/** Adds random tank starts to any level source without changing its file format. */
+/**
+ * LevelSource decorator; adds generated bot positions to any underlying source.
+ * <p>Adds random tank starts to any level source without changing its file format.
+ */
 public final class RandomTankLevelSource implements LevelSource {
     private final LevelSource source;
     private final int count;

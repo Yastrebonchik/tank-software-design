@@ -4,7 +4,10 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import java.util.Objects;
 
-/** Adds a health bar to any positioned view without changing its base rendering. */
+/**
+ * Graphics decorator; wraps a positioned view and reads HealthStatus without changing the model.
+ * <p>Adds a health bar to any positioned view without changing its base rendering.
+ */
 public final class HealthBarDecorator implements PositionedObjectView {
     private final PositionedObjectView wrapped;
     private final HealthStatus health;

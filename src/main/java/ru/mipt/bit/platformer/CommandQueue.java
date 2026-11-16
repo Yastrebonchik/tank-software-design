@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/** Application command dispatcher; commands submitted during execution wait for the next frame. */
 public final class CommandQueue {
     private final List<GameCommand> pending = new ArrayList<>();
 

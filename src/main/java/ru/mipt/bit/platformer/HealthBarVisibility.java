@@ -1,6 +1,9 @@
 package ru.mipt.bit.platformer;
 
-/** One display setting shared by every health bar in a scene. */
+/**
+ * Application presentation state; a scene-wide preference, not a tank gameplay rule.
+ * <p>One display setting shared by every health bar in a scene.
+ */
 public final class HealthBarVisibility {
     private boolean visible;
 

@@ -1,6 +1,9 @@
 package ru.mipt.bit.platformer;
 
-/** Immutable combat parameters, shared by tanks with the same weapon. */
+/**
+ * Domain value object; immutable combat configuration.
+ * <p>Immutable combat parameters, shared by tanks with the same weapon.
+ */
 public final class CombatSettings {
     public static final CombatSettings DEFAULT = new CombatSettings(100, 25, 0.5f, 5f);
     private final int health;

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/** Domain simulation; owns object lifecycle and publishes events through WorldListener. */
 public final class GameWorld implements Updatable {
     private final GameField field;
     private final List<CellOccupant> objects = new ArrayList<>();

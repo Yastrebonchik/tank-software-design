@@ -2,6 +2,7 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
+/** Application action; delegates shooting rules to its Tank receiver. */
 public final class ShootTankCommand implements GameCommand {
     private final Tank tank;
     private final GameWorld world;

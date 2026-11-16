@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-/** Immutable initial layout. It is not the live occupancy or position of game objects. */
+/**
+ * Immutable initial-level data crossing the loading boundary; not the mutable game world.
+ * <p>Immutable initial layout. It is not the live occupancy or position of game objects.
+ */
 public final class LevelDefinition {
     private final int width;
     private final int height;
