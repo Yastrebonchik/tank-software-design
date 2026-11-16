@@ -5,7 +5,10 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.getSingleLayer;
 
-/** Repeats the existing grass pattern. The logical level supplies the dimensions. */
+/**
+ * Graphics infrastructure; constructs a LibGDX tile map from logical dimensions.
+ * <p>Repeats the existing grass pattern. The logical level supplies the dimensions.
+ */
 public final class GroundMapFactory {
     public TiledMap create(int width, int height) {
         if (width <= 0 || height <= 0) { throw new IllegalArgumentException("Ground dimensions must be positive"); }

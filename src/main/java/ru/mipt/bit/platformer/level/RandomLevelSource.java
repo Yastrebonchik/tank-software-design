@@ -8,6 +8,7 @@ import java.util.Random;
 import ru.mipt.bit.platformer.Direction;
 import ru.mipt.bit.platformer.level.LevelDefinition.Position;
 
+/** Procedural LevelSource implementation; builds initial data without file or graphics I/O. */
 public final class RandomLevelSource implements LevelSource {
     private final int width;
     private final int height;

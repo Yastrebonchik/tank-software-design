@@ -1,5 +1,6 @@
 package ru.mipt.bit.platformer;
 
+/** Domain entity; a stationary cell occupant. */
 public final class Tree implements CellOccupant {
     private final int x;
     private final int y;

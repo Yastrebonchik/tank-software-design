@@ -2,7 +2,10 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
-/** Coordinates a frame without depending on a window or a graphics library. */
+/**
+ * Application service; tick is the frame entry point driven by GdxGameApplication.
+ * <p>Coordinates a frame without depending on a window or a graphics library.
+ */
 public final class GameCycle {
     private final InputHandler input;
     private final CommandQueue commands;

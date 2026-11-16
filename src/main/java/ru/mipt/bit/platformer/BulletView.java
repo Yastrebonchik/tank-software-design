@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import java.util.Objects;
 
+/** Graphics adapter component; reads Bullet state and draws its sprite. */
 public final class BulletView implements ObjectView {
     private final Bullet bullet;
     private final TextureRegion graphics;

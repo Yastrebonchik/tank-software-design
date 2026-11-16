@@ -5,7 +5,10 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** Keeps the graphics in sync through the same events for initial and runtime objects. */
+/**
+ * Outgoing graphics adapter for WorldListener; maps model lifecycle events to views.
+ * <p>Keeps the graphics in sync through the same events for initial and runtime objects.
+ */
 public final class WorldViewListener implements WorldListener, Disposable {
     private final GameWorld world;
     private final GameRenderer renderer;

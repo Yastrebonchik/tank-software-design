@@ -10,7 +10,10 @@ import ru.mipt.bit.platformer.level.LevelSource;
 import ru.mipt.bit.platformer.level.RandomLevelSource;
 import ru.mipt.bit.platformer.level.RandomTankLevelSource;
 
-/** Command-line configuration is kept outside the game loop and input dispatch. */
+/**
+ * CLI configuration adapter at the composition boundary; validates arguments and builds settings.
+ * <p>Command-line configuration is kept outside the game loop and input dispatch.
+ */
 public final class LaunchOptions {
     private final Path file;
     private final int width;
@@ -18,14 +21,16 @@ public final class LaunchOptions {
     private final int trees;
     private final Long seed;
     private final int bots;
+    private final int damage;
 
-    private LaunchOptions(Path file, int width, int height, int trees, int bots, Long seed) {
+    private LaunchOptions(Path file, int width, int height, int trees, int bots, Long seed, int damage) {
         this.file = file;
         this.width = width;
         this.height = height;
         this.trees = trees;
         this.seed = seed;
         this.bots = bots;
+        this.damage = damage;
     }
 
     public static LaunchOptions parse(String... args) {
@@ -35,7 +40,7 @@ public final class LaunchOptions {
             if (values.containsKey(option)) { throw new IllegalArgumentException("Duplicate option: " + option); }
             switch (option) {
                 case "--random": values.put(option, "true"); break;
-                case "--level": case "--width": case "--height": case "--trees": case "--seed": case "--bots":
+                case "--level": case "--width": case "--height": case "--trees": case "--seed": case "--bots": case "--damage":
                     if (i + 1 == args.length || args[i + 1].startsWith("--") || args[i + 1].isEmpty()) {
                         throw new IllegalArgumentException("Missing value for " + option);
                     }
@@ -44,6 +49,8 @@ public final class LaunchOptions {
                 default: throw new IllegalArgumentException("Unknown option: " + option);
             }
         }
+        int damage = integer(values, "--damage", CombatSettings.DEFAULT.getDamage());
+        if (damage <= 0) { throw new IllegalArgumentException("--damage must be positive"); }
         int bots = integer(values, "--bots", 3);
         if (bots < 0) { throw new IllegalArgumentException("--bots must be non-negative"); }
         Long seed = values.containsKey("--seed") ? seed(values.get("--seed")) : null;
@@ -52,10 +59,10 @@ public final class LaunchOptions {
                     || values.containsKey("--height") || values.containsKey("--trees")) {
                 throw new IllegalArgumentException("--level cannot be combined with random level options");
             }
-            return new LaunchOptions(Paths.get(values.get("--level")), 0, 0, 0, bots, seed);
+            return new LaunchOptions(Paths.get(values.get("--level")), 0, 0, 0, bots, seed, damage);
         }
         return new LaunchOptions(null, integer(values, "--width", 10), integer(values, "--height", 8),
-                integer(values, "--trees", 12), bots, seed);
+                integer(values, "--trees", 12), bots, seed, damage);
     }
 
     private static int integer(Map<String, String> values, String name, int fallback) {
@@ -72,6 +79,11 @@ public final class LaunchOptions {
     public Random createAiRandom() { return random(0xB07A1L); }
 
     private Random random(long salt) { return seed == null ? new Random() : new Random(seed ^ salt); }
+
+    public CombatSettings createCombatSettings() {
+        CombatSettings defaults = CombatSettings.DEFAULT;
+        return new CombatSettings(defaults.getHealth(), damage, defaults.getReloadSeconds(), defaults.getBulletSpeed());
+    }
 
     public LevelSource createLevelSource() {
         LevelSource terrain = file != null ? new FileLevelSource(file)

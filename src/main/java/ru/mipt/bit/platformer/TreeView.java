@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.Objects;
 import static ru.mipt.bit.platformer.util.GdxGameUtils.*;
 
+/** Graphics adapter component; draws a Tree at its model position. */
 public final class TreeView implements ObjectView {
     private final TextureRegion graphics;
     private final Rectangle rectangle;

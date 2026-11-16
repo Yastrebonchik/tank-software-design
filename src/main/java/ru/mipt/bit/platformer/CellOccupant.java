@@ -1,5 +1,6 @@
 package ru.mipt.bit.platformer;
 
+/** Domain capability, not an external-system port; answers occupancy queries. */
 public interface CellOccupant {
     boolean tileOccupied(int x, int y);
 

@@ -2,9 +2,11 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
+/** Domain entity; owns position and health, delegates State selection to its policy. No rendering dependency. */
 public final class Tank implements CellOccupant, Updatable, Damageable, HealthStatus {
     private final float moveDurationSeconds;
     private final CombatSettings combat;
+    private final TankStatePolicy statePolicy;
     private int health;
     private float reloadRemaining;
     private static final float PROGRESS_TOLERANCE = 0.000001f;
@@ -21,8 +23,14 @@ public final class Tank implements CellOccupant, Updatable, Damageable, HealthSt
     }
 
     public Tank(int x, int y, float moveDurationSeconds, CombatSettings combat) {
+        this(x, y, moveDurationSeconds, combat, new HealthTankStateResolver());
+    }
+
+    public Tank(int x, int y, float moveDurationSeconds, CombatSettings combat, TankStatePolicy statePolicy) {
         this.combat = Objects.requireNonNull(combat);
+        this.statePolicy = Objects.requireNonNull(statePolicy);
         health = combat.getHealth();
+        getState(); // Validate the initial policy result before the tank enters the world.
         if (!Float.isFinite(moveDurationSeconds) || moveDurationSeconds <= 0f) {
             throw new IllegalArgumentException("Move duration must be finite and positive");
         }
@@ -54,7 +62,7 @@ public final class Tank implements CellOccupant, Updatable, Damageable, HealthSt
 
     public boolean tryShoot(GameWorld world) {
         Objects.requireNonNull(world);
-        if (!isAlive() || isMoving() || reloadRemaining > 0f || !world.containsObject(this)) { return false; }
+        if (!isAlive() || !getState().canShoot() || isMoving() || reloadRemaining > 0f || !world.containsObject(this)) { return false; }
         reloadRemaining = combat.getReloadSeconds();
         Bullet bullet = new Bullet(x + direction.getDeltaX(), y + direction.getDeltaY(),
                 direction, combat.getBulletSpeed(), combat.getDamage(), this, world);
@@ -67,11 +75,16 @@ public final class Tank implements CellOccupant, Updatable, Damageable, HealthSt
     @Override public void takeDamage(int damage) {
         if (damage <= 0) { throw new IllegalArgumentException("Damage must be positive"); }
         health = Math.max(0, health - damage);
+        // State selection reads the new health without resetting movement or reload work.
     }
 
     @Override public boolean isAlive() { return health > 0; }
     @Override public int getHealth() { return health; }
     @Override public int getMaxHealth() { return combat.getHealth(); }
+    /** Read the current policy so external condition changes are visible immediately. */
+    public TankState getState() {
+        return Objects.requireNonNull(statePolicy.resolve(health, combat.getHealth()), "State policy must return a state");
+    }
     public float getReloadRemaining() { return reloadRemaining; }
 
     @Override
@@ -80,10 +93,12 @@ public final class Tank implements CellOccupant, Updatable, Damageable, HealthSt
             throw new IllegalArgumentException("deltaTime must be finite and non-negative");
         }
         if (!isAlive()) { return; }
-        reloadRemaining = Math.max(0f, reloadRemaining - deltaTime);
+        // One selection per update keeps movement and reload on the same behavior.
+        TankState state = getState();
+        reloadRemaining = Math.max(0f, reloadRemaining - state.reloadProgress(deltaTime));
         if (reloadRemaining <= PROGRESS_TOLERANCE) { reloadRemaining = 0f; }
         movementProgress = Math.max(0f, Math.min(1f,
-                movementProgress + deltaTime / moveDurationSeconds));
+                movementProgress + state.movementProgress(deltaTime, moveDurationSeconds)));
         if (Math.abs(1f - movementProgress) <= PROGRESS_TOLERANCE) {
             movementProgress = 1f;
             movementStartX = x;

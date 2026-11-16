@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Rectangle;
 
 import static ru.mipt.bit.platformer.util.GdxGameUtils.moveRectangleAtTileCenter;
 
+/** Graphics interpolation helper; uses LibGDX types and does not own logical movement. */
 public class TileMovement {
 
     private final TiledMapTileLayer tileLayer;

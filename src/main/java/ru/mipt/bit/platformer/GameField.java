@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/** Domain service; indexes object references and queries their occupancy, without copying positions. */
 public final class GameField {
     private final int width;
     private final int height;

@@ -1,6 +1,9 @@
 package ru.mipt.bit.platformer;
 
-/** A direction in the logical grid, independent of any sprite or object type. */
+/**
+ * Domain value type shared by movement, projectiles and presentation.
+ * <p>A direction in the logical grid, independent of any sprite or object type.
+ */
 public enum Direction {
     UP(0, 1), DOWN(0, -1), LEFT(-1, 0), RIGHT(1, 0);
 

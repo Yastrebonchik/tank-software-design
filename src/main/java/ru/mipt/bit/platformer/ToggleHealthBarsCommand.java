@@ -2,6 +2,7 @@ package ru.mipt.bit.platformer;
 
 import java.util.Objects;
 
+/** Application presentation action; changes a framework-free display preference. */
 public final class ToggleHealthBarsCommand implements GameCommand {
     private final HealthBarVisibility visibility;
 

@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-/** Model-to-view bindings are configured when assembling the scene. */
+/**
+ * Graphics factory registry; configured by the composition root, not a domain service.
+ * <p>Model-to-view bindings are configured when assembling the scene.
+ */
 public final class ObjectViewFactory {
     private final Map<Class<?>, Function<CellOccupant, ObjectView>> factories = new HashMap<>();
 

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/** Runs control strategies in a stable order before the world advances. */
+/**
+ * Application coordinator for ordered command sources; implements InputHandler.
+ * <p>Runs control strategies in a stable order before the world advances.
+ */
 public final class CompositeInputHandler implements InputHandler {
     private final List<InputHandler> handlers;
 

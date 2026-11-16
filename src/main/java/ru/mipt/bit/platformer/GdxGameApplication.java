@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/** Incoming LibGDX lifecycle adapter; drives GameCycle with frame time and window events. */
 public final class GdxGameApplication extends ApplicationAdapter {
     private final Supplier<GameCycle> factory;
     private GameCycle cycle;

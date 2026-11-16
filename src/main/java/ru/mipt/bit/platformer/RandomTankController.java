@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-/** Selects one configured command while its tank is alive and idle. */
+/**
+ * Application AI strategy; implements InputHandler and submits commands without device I/O.
+ * <p>Selects one configured command while its tank is alive and idle.
+ */
 public final class RandomTankController implements InputHandler {
     private final Tank tank;
     private final Random random;
